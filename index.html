@@ -1,0 +1,1507 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pharma Factory Compliance Questionnaire</title>
+  <style>
+    :root {
+      --bg: #0f1720;
+      --panel: #16202b;
+      --panel-2: #1d2a37;
+      --line: rgba(255, 255, 255, 0.10);
+      --text: #ecf2f7;
+      --muted: #a9bac9;
+      --accent: #4cc9a4;
+      --accent-2: #5b8cff;
+      --warning: #ffb020;
+      --danger: #ff6b6b;
+      --ok: #5ee06b;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+      --radius: 18px;
+      --radius-sm: 12px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", "Trebuchet MS", "Bahnschrift", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(91, 140, 255, 0.22), transparent 34%),
+        radial-gradient(circle at top right, rgba(76, 201, 164, 0.18), transparent 28%),
+        linear-gradient(180deg, #0b1118 0%, #101a24 100%);
+    }
+
+    .shell {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.7fr 1fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    .hero-panel,
+    .summary,
+    .section,
+    .report-panel {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .hero-panel {
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-panel::after {
+      content: "";
+      position: absolute;
+      inset: auto -120px -120px auto;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(76, 201, 164, 0.24), transparent 68%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(76, 201, 164, 0.12);
+      color: #bff5e6;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 16px 0 12px;
+      font-size: clamp(30px, 4vw, 52px);
+      line-height: 1.03;
+      letter-spacing: -0.04em;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 70ch;
+      line-height: 1.55;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .controls .btn {
+      min-width: 140px;
+    }
+
+    .btn,
+    select,
+    textarea,
+    input[type="text"] {
+      font: inherit;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      color: var(--text);
+      background: linear-gradient(135deg, rgba(91, 140, 255, 0.95), rgba(76, 201, 164, 0.86));
+      box-shadow: 0 10px 30px rgba(91, 140, 255, 0.18);
+      transition: transform 0.15s ease, filter 0.15s ease;
+      text-decoration: none;
+    }
+
+    .btn.secondary {
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: none;
+      border: 1px solid var(--line);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    .summary {
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    .stat strong {
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .status-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .chip.ok { color: #bff5c5; }
+    .chip.warn { color: #ffd78a; }
+    .chip.danger { color: #ffb0b0; }
+
+    .content {
+      display: grid;
+      gap: 18px;
+    }
+
+    .section {
+      padding: 18px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .section-title small {
+      color: var(--muted);
+    }
+
+    .section-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(91, 140, 255, 0.12);
+      color: #c9d9ff;
+      border: 1px solid rgba(91, 140, 255, 0.20);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .questions {
+      display: grid;
+      gap: 12px;
+    }
+
+    .question {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 270px;
+      gap: 14px;
+      align-items: center;
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .question h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+      line-height: 1.35;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .tag.critical {
+      background: rgba(255, 107, 107, 0.12);
+      border-color: rgba(255, 107, 107, 0.26);
+      color: #ffcbcb;
+    }
+
+    .select-wrap {
+      display: grid;
+      gap: 8px;
+    }
+
+    select {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(10, 16, 22, 0.72);
+      color: var(--text);
+      padding: 0 12px;
+      outline: none;
+    }
+
+    select:focus,
+    textarea:focus,
+    input[type="text"]:focus {
+      border-color: rgba(76, 201, 164, 0.45);
+      box-shadow: 0 0 0 3px rgba(76, 201, 164, 0.12);
+    }
+
+    .select-score {
+      font-size: 13px;
+      color: var(--muted);
+      min-height: 18px;
+    }
+
+    .danger-row {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255, 107, 107, 0.11);
+      border: 1px solid rgba(255, 107, 107, 0.28);
+      color: #ffd2d2;
+      display: none;
+    }
+
+    .comments {
+      margin-top: 16px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .comments label,
+    .report-panel h2,
+    .report-panel h3 {
+      margin: 0;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      resize: vertical;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(10, 16, 22, 0.72);
+      color: var(--text);
+      padding: 12px;
+    }
+
+    .report-panel {
+      margin-top: 18px;
+      padding: 18px;
+    }
+
+    .submit-panel {
+      margin-top: 18px;
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .report-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .report-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .reviewer-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: end;
+    }
+
+    .field-group {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field-group label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .field-group input[type="text"] {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(10, 16, 22, 0.72);
+      color: var(--text);
+      padding: 0 12px;
+      outline: none;
+    }
+
+    .submit-panel .btn {
+      min-height: 48px;
+      padding-inline: 18px;
+    }
+
+    .report-preview {
+      display: grid;
+      gap: 14px;
+    }
+
+    .report-frame {
+      border-radius: 18px;
+      background: rgba(8, 13, 18, 0.66);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .report-header {
+      display: grid;
+      gap: 10px;
+      padding: 18px;
+      background: linear-gradient(135deg, rgba(91, 140, 255, 0.16), rgba(76, 201, 164, 0.10));
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .report-header h3,
+    .report-section h4,
+    .report-section p,
+    .report-section ul {
+      margin: 0;
+    }
+
+    .report-metadata {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .report-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .report-summary-card {
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .report-summary-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .report-summary-card strong {
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .report-section {
+      padding: 16px 18px;
+      display: grid;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .report-section-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .report-section-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .report-question-row {
+      display: grid;
+      gap: 8px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .report-question-row strong {
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .report-question-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .report-question-meta .tag {
+      font-size: 12px;
+    }
+
+    .report-comments {
+      padding: 16px 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: grid;
+      gap: 8px;
+    }
+
+    .report-signature {
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .signature-line {
+      min-height: 44px;
+      display: grid;
+      align-items: end;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+      color: var(--text);
+      padding-bottom: 6px;
+    }
+
+    .report-empty {
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .empty {
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .footer-note {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 1080px) {
+      .hero { grid-template-columns: 1fr; }
+      .question { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .shell { padding: 14px; }
+      .hero-panel, .summary, .section, .report-panel { border-radius: 16px; }
+      .stat-grid { grid-template-columns: 1fr; }
+      .section-header, .report-toolbar { align-items: flex-start; flex-direction: column; }
+      .controls .btn,
+      .report-actions .btn,
+      .submit-panel .btn {
+        width: 100%;
+      }
+      .reviewer-grid,
+      .report-summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+        color: #111;
+      }
+
+      .hero,
+      .content,
+      .submit-panel,
+      .controls,
+      .report-actions {
+        display: none !important;
+      }
+
+      .shell {
+        max-width: none;
+        padding: 0;
+      }
+
+      .report-panel {
+        margin: 0;
+        border: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+        background: #fff;
+        color: #111;
+      }
+
+      .report-frame,
+      .report-section,
+      .report-header,
+      .report-signature {
+        break-inside: avoid;
+      }
+
+      .report-frame {
+        border: 1px solid #ddd;
+        background: #fff;
+      }
+
+      .report-header,
+      .report-section,
+      .report-signature {
+        background: #fff;
+        color: #111;
+      }
+
+      .tag,
+      .chip,
+      .section-badge {
+        color: #111 !important;
+        border-color: #ccc !important;
+        background: #f5f5f5 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-panel">
+        <div class="eyebrow">Pharma Factory Review Tool</div>
+        <h1>CSV-driven compliance questionnaire for pharmaceutical factory audits.</h1>
+        <p>
+          The questionnaire loads from a fixed CSV source, so non-technical reviewers only need to answer the dropdowns,
+          mark critical items that fail as danger events, and capture section comments for the final report.
+        </p>
+        <div class="controls">
+          <button class="btn secondary" id="resetBtn" type="button">Reset responses</button>
+        </div>
+        <p class="footer-note" id="loadNote">Questionnaire source: questions.sample.csv</p>
+      </div>
+
+      <aside class="summary">
+        <div class="stat-grid">
+          <div class="stat">
+            <span>Overall average</span>
+            <strong id="overallScore">-</strong>
+          </div>
+          <div class="stat">
+            <span>Answered</span>
+            <strong id="answeredCount">0/0</strong>
+          </div>
+          <div class="stat">
+            <span>Critical dangers</span>
+            <strong id="dangerCount">0</strong>
+          </div>
+          <div class="stat">
+            <span>Compliant</span>
+            <strong id="compliantCount">0</strong>
+          </div>
+        </div>
+        <div class="status-line" id="statusLine">
+          <span class="chip warn">Loading questionnaire...</span>
+        </div>
+        <div class="empty" id="emptyState">
+          Loading the fixed questionnaire CSV.
+        </div>
+      </aside>
+    </section>
+
+    <section id="questionnaire" class="content"></section>
+
+    <section class="submit-panel">
+      <div class="reviewer-grid">
+        <label class="field-group" for="reviewerName">
+          <span>Reviewer name</span>
+          <input id="reviewerName" type="text" placeholder="Enter reviewer name for the final report" />
+        </label>
+        <button class="btn" id="generateBtn" type="button">Generate final report</button>
+      </div>
+    </section>
+
+    <section class="report-panel">
+      <div class="report-toolbar">
+        <div>
+          <h2>Final Report</h2>
+          <div class="footer-note">A styled report preview is shown below. Use Download PDF to save a file directly.</div>
+        </div>
+        <div class="report-actions">
+          <button class="btn secondary" id="copyReportBtn" type="button">Copy report</button>
+          <button class="btn secondary" id="downloadPdfBtn" type="button">Download PDF</button>
+        </div>
+      </div>
+      <div id="reportPreview" class="report-preview report-empty">Generate the report after answering the questionnaire.</div>
+    </section>
+  </main>
+
+  <script>
+    const sampleCsv = `section,question_id,question,critical,answer_1_label,answer_1_score,answer_2_label,answer_2_score,answer_3_label,answer_3_score,answer_4_label,answer_4_score
+  Premises and Environment,PE-01,"Are cleanroom entry controls and gowning requirements enforced?",Yes,No written control or no evidence,1,Some control but inconsistent,2,Mostly controlled with minor gaps,3,Fully compliant and consistently evidenced,4
+  Premises and Environment,PE-02,"Are pest control records current and complete?",Yes,No program or no evidence,1,Program exists but records are incomplete,2,Records are current with minor gaps,3,Current and complete,4
+  Premises and Environment,PE-03,"Are temperature and humidity monitored within defined limits?",No,No monitoring,1,Monitoring absent or unreliable,2,Monitoring present with limited issues,3,Monitored and within limits,4
+  Documentation and Records,DR-01,"Are SOPs current, approved, and controlled?",Yes,No approved SOPs,1,Partial SOP control,2,Current SOPs with minor updates pending,3,Current approved SOP set,4
+  Documentation and Records,DR-02,"Are batch records complete, legible, and reviewed?",No,Not complete,1,Major completion gaps,2,Mostly complete and reviewed,3,Complete and reviewed,4
+  Documentation and Records,DR-03,"Are deviations investigated and closed within target timelines?",Yes,No deviation system,1,System exists but not closed consistently,2,Tracked with some overdue items,3,Closed within target with minor exceptions,4
+  Production and Equipment,PR-01,"Is equipment calibration current before use?",Yes,No calibration control,1,Calibration lapses or unknown status,2,Some current calibration with exceptions,3,Current for most equipment,4
+  Production and Equipment,PR-02,"Are line clearance checks documented before each batch?",No,No line clearance checks,1,Partial checks only,2,Checks completed with some omissions,3,Documented for each batch,4
+  Production and Equipment,PR-03,"Are preventive maintenance records current?",No,No maintenance records,1,Major maintenance gaps,2,Some records current but overdue items exist,3,Current with minor overdue items,4
+  Quality and Release,QR-01,"Are QC samples traceable to the batch and retain samples held?",Yes,No traceability,1,Traceability unreliable,2,Traceable with minor issues,3,Fully traceable and retained,4
+  Quality and Release,QR-02,"Are finished goods held pending QA release?",Yes,Released before QA approval,1,Release control missing,2,Control exists but exceptions seen,3,Held pending release with minor gaps,4
+  Quality and Release,QR-03,"Are complaints and recalls managed under a documented procedure?",No,No documented procedure,1,Procedure exists but not used,2,Procedure used with some gaps,3,Documented and followed,4`;
+
+    const QUESTIONNAIRE_CSV_PATH = 'questions.sample.csv';
+
+    const state = {
+      questions: [],
+      responses: {},
+      comments: {},
+      currentFileName: QUESTIONNAIRE_CSV_PATH,
+      reviewerName: '',
+      reportText: ''
+    };
+
+    const questionnaireEl = document.getElementById('questionnaire');
+    const reportPreviewEl = document.getElementById('reportPreview');
+    const statusLineEl = document.getElementById('statusLine');
+    const emptyStateEl = document.getElementById('emptyState');
+    const overallScoreEl = document.getElementById('overallScore');
+    const answeredCountEl = document.getElementById('answeredCount');
+    const dangerCountEl = document.getElementById('dangerCount');
+    const compliantCountEl = document.getElementById('compliantCount');
+    const loadNoteEl = document.getElementById('loadNote');
+    const reviewerNameEl = document.getElementById('reviewerName');
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      state.responses = {};
+      state.comments = {};
+      state.reportText = '';
+      renderQuestionnaire();
+      updateSummary();
+      renderReport();
+    });
+
+    document.getElementById('generateBtn').addEventListener('click', () => {
+      renderReport();
+      reportPreviewEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    document.getElementById('copyReportBtn').addEventListener('click', async () => {
+      const report = state.reportText || generateReportText(buildReportData());
+      try {
+        await navigator.clipboard.writeText(report);
+        setStatus('Report copied to clipboard.', 'ok');
+      } catch {
+        setStatus('Copy failed. Select the report text and copy manually.', 'warn');
+      }
+    });
+
+    document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+      renderReport();
+      downloadReportPdf();
+    });
+
+    reviewerNameEl.addEventListener('input', (event) => {
+      state.reviewerName = event.target.value;
+      renderReport();
+    });
+
+    function parseCsv(text) {
+      const rows = [];
+      let current = '';
+      let row = [];
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i += 1) {
+        const char = text[i];
+        const next = text[i + 1];
+
+        if (char === '"' && inQuotes && next === '"') {
+          current += '"';
+          i += 1;
+          continue;
+        }
+
+        if (char === '"') {
+          inQuotes = !inQuotes;
+          continue;
+        }
+
+        if (char === ',' && !inQuotes) {
+          row.push(current);
+          current = '';
+          continue;
+        }
+
+        if ((char === '\n' || char === '\r') && !inQuotes) {
+          if (char === '\r' && next === '\n') i += 1;
+          row.push(current);
+          if (row.some((cell) => cell.trim() !== '')) rows.push(row);
+          row = [];
+          current = '';
+          continue;
+        }
+
+        current += char;
+      }
+
+      row.push(current);
+      if (row.some((cell) => cell.trim() !== '')) rows.push(row);
+      return rows;
+    }
+
+    function normalizeQuestions(csvText) {
+      const rows = parseCsv(csvText.trim());
+      if (rows.length < 2) throw new Error('CSV must include a header row and at least one question');
+
+      const headers = rows[0].map((header) => header.trim());
+      const required = [
+        'section', 'question_id', 'question', 'critical',
+        'answer_1_label', 'answer_1_score',
+        'answer_2_label', 'answer_2_score',
+        'answer_3_label', 'answer_3_score',
+        'answer_4_label', 'answer_4_score'
+      ];
+
+      for (const column of required) {
+        if (!headers.includes(column)) {
+          throw new Error(`Missing required CSV column: ${column}`);
+        }
+      }
+
+      return rows.slice(1).map((row) => {
+        const record = Object.fromEntries(headers.map((header, index) => [header, (row[index] || '').trim()]));
+        return {
+          section: record.section,
+          questionId: record.question_id,
+          question: record.question,
+          critical: /^y(es)?|true|1$/i.test(record.critical),
+          answers: [1, 2, 3, 4].map((score) => ({
+            label: record[`answer_${score}_label`],
+            score: Number(record[`answer_${score}_score`])
+          }))
+        };
+      }).filter((question) => question.section && question.questionId && question.question);
+    }
+
+    function loadCsvText(text, fileName) {
+      try {
+        state.questions = normalizeQuestions(text);
+        state.responses = {};
+        state.comments = {};
+        state.currentFileName = fileName;
+        loadNoteEl.textContent = `Questionnaire source: ${fileName}`;
+        emptyStateEl.style.display = 'none';
+        renderQuestionnaire();
+        updateSummary();
+        renderReport();
+        setStatus(`Loaded ${state.questions.length} questions from ${fileName}.`, 'ok');
+      } catch (error) {
+        setStatus(error.message, 'danger');
+      }
+    }
+
+    async function loadQuestionnaire() {
+      try {
+        const response = await fetch(QUESTIONNAIRE_CSV_PATH, { cache: 'no-store' });
+        if (!response.ok) throw new Error('Questionnaire CSV not reachable');
+        const text = await response.text();
+        loadCsvText(text, QUESTIONNAIRE_CSV_PATH);
+      } catch (error) {
+        loadCsvText(sampleCsv, 'embedded fallback sample CSV');
+        setStatus('Fixed questionnaire CSV could not be loaded, so the embedded fallback was used instead.', 'warn');
+      }
+    }
+
+    function buildReportData() {
+      if (!state.questions.length) return null;
+
+      const groups = groupBySection();
+      const sections = [];
+      let totalScore = 0;
+      let answered = 0;
+      let dangers = 0;
+      let compliant = 0;
+
+      for (const [sectionName, questions] of groups.entries()) {
+        let sectionScore = 0;
+        let sectionAnswered = 0;
+        const items = [];
+        const sectionDangers = [];
+
+        questions.forEach((question) => {
+          const response = state.responses[question.questionId];
+          const selectedAnswer = question.answers.find((answer) => String(answer.score) === String(response));
+          const answerText = selectedAnswer ? `${selectedAnswer.label} (Score ${selectedAnswer.score})` : 'Not answered';
+          const score = response ? Number(response) : null;
+
+          items.push({
+            questionId: question.questionId,
+            question: question.question,
+            answerText,
+            critical: question.critical,
+            score,
+            danger: Boolean(question.critical && score !== null && score < 4)
+          });
+
+          if (response) {
+            totalScore += score;
+            answered += 1;
+            sectionScore += score;
+            sectionAnswered += 1;
+            if (score === 4) compliant += 1;
+            if (question.critical && score < 4) {
+              dangers += 1;
+              sectionDangers.push(`${question.questionId} (${score})`);
+            }
+          }
+        });
+
+        sections.push({
+          sectionName,
+          questions,
+          items,
+          sectionAnswered,
+          sectionScore,
+          average: sectionAnswered ? (sectionScore / sectionAnswered).toFixed(2) : '-',
+          comments: state.comments[sectionName] || '',
+          sectionDangers
+        });
+      }
+
+      return {
+        generatedAt: new Date().toLocaleString(),
+        reviewerName: state.reviewerName.trim(),
+        sourceFile: state.currentFileName,
+        answered,
+        totalQuestions: state.questions.length,
+        totalScore,
+        average: answered ? (totalScore / answered).toFixed(2) : '-',
+        compliant,
+        dangers,
+        sections
+      };
+    }
+
+    function renderReport() {
+      const data = buildReportData();
+      if (!data) {
+        state.reportText = '';
+        reportPreviewEl.className = 'report-preview report-empty';
+        reportPreviewEl.innerHTML = 'Generate the report after answering the questionnaire.';
+        return;
+      }
+
+      state.reportText = generateReportText(data);
+      reportPreviewEl.className = 'report-preview';
+      reportPreviewEl.innerHTML = renderReportHtml(data);
+    }
+
+    function renderReportHtml(data) {
+      const sectionMarkup = data.sections.map((section) => `
+        <section class="report-section">
+          <div class="report-section-header">
+            <div>
+              <h4>${escapeHtml(section.sectionName)}</h4>
+              <div class="report-metadata">
+                <span>${section.questions.length} question${section.questions.length === 1 ? '' : 's'}</span>
+                <span>Average score: ${section.average}</span>
+                <span>Critical danger items: ${section.sectionDangers.length}</span>
+              </div>
+            </div>
+            <span class="section-badge">Section score: ${section.average}</span>
+          </div>
+          <div class="report-section-list">
+            ${section.items.map((item) => `
+              <div class="report-question-row">
+                <strong>${escapeHtml(item.question)}</strong>
+                <div class="report-question-meta">
+                  <span class="tag">ID ${escapeHtml(item.questionId)}</span>
+                  <span class="tag ${item.critical ? 'critical' : ''}">${item.critical ? 'Critical' : 'Standard'}</span>
+                  <span class="tag">${escapeHtml(item.answerText)}</span>
+                  ${item.danger ? '<span class="tag critical">Danger</span>' : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="report-comments">
+            <span class="tag">Section comments</span>
+            <p>${escapeHtml(section.comments || 'None recorded')}</p>
+            <p>Danger items: ${section.sectionDangers.length ? escapeHtml(section.sectionDangers.join(', ')) : 'None'}</p>
+          </div>
+        </section>
+      `).join('');
+
+      return `
+        <div class="report-frame">
+          <div class="report-header">
+            <h3>Pharmaceutical Factory Compliance Review</h3>
+            <div class="report-metadata">
+              <span>Source file: ${escapeHtml(data.sourceFile)}</span>
+              <span>Generated: ${escapeHtml(data.generatedAt)}</span>
+              <span>Reviewer: ${escapeHtml(data.reviewerName || 'Not entered')}</span>
+            </div>
+            <div class="report-summary-grid">
+              <div class="report-summary-card"><span>Answered</span><strong>${data.answered}/${data.totalQuestions}</strong></div>
+              <div class="report-summary-card"><span>Overall average</span><strong>${data.average}</strong></div>
+              <div class="report-summary-card"><span>Compliant answers</span><strong>${data.compliant}</strong></div>
+              <div class="report-summary-card"><span>Critical dangers</span><strong>${data.dangers}</strong></div>
+            </div>
+          </div>
+          ${sectionMarkup}
+          <div class="report-signature">
+            <h4>Reviewer signature</h4>
+            <div class="reviewer-grid">
+              <div class="field-group">
+                <label>Name</label>
+                <div class="signature-line">${escapeHtml(data.reviewerName || 'Not entered')}</div>
+              </div>
+              <div class="field-group">
+                <label>Signed</label>
+                <div class="signature-line">____________________________</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function generateReportText(data) {
+      if (!data) return 'No questionnaire loaded.';
+
+      const lines = [];
+      lines.push('Pharmaceutical Factory Compliance Review');
+      lines.push(`Source file: ${data.sourceFile}`);
+      lines.push(`Generated: ${data.generatedAt}`);
+      lines.push(`Reviewer: ${data.reviewerName || 'Not entered'}`);
+      lines.push('');
+
+      for (const section of data.sections) {
+        lines.push(`SECTION: ${section.sectionName}`);
+        section.items.forEach((item) => {
+          lines.push(`- ${item.questionId}: ${item.question}`);
+          lines.push(`  Answer: ${item.answerText}`);
+          lines.push(`  Critical: ${item.critical ? 'Yes' : 'No'}`);
+        });
+        lines.push(`Section average: ${section.average}`);
+        lines.push(`Comments: ${section.comments || 'None recorded'}`);
+        lines.push(`Danger items: ${section.sectionDangers.length ? section.sectionDangers.join(', ') : 'None'}`);
+        lines.push('');
+      }
+
+      lines.push('SUMMARY');
+      lines.push(`Answered: ${data.answered}/${data.totalQuestions}`);
+      lines.push(`Overall average score: ${data.average}`);
+      lines.push(`Compliant answers (score 4): ${data.compliant}`);
+      lines.push(`Critical dangers: ${data.dangers}`);
+      lines.push(`Reviewer signature: ${data.reviewerName || 'Not entered'}`);
+
+      return lines.join('\n');
+    }
+
+    function downloadReportPdf() {
+      const report = state.reportText || generateReportText(buildReportData());
+      const pdfText = buildPdfDocument(report, state.reviewerName.trim() || 'Not entered');
+      const blob = new Blob([pdfText], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const safeDate = new Date().toISOString().slice(0, 10);
+      link.href = url;
+      link.download = `pharma-factory-compliance-review-${safeDate}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setStatus('PDF downloaded.', 'ok');
+    }
+
+    function buildPdfDocument(bodyText, reviewerName) {
+      const pageWidth = 595.28;
+      const pageHeight = 841.89;
+      const marginX = 42;
+      const marginTop = 48;
+      const marginBottom = 48;
+      const fontSize = 11;
+      const lineHeight = 14;
+      const usableWidth = pageWidth - marginX * 2;
+
+      const sourceLines = normalizePdfText(bodyText).split('\n');
+
+      const wrappedLines = [];
+      sourceLines.forEach((paragraph) => {
+        if (paragraph === '') {
+          wrappedLines.push('');
+          return;
+        }
+        wrappedLines.push(...wrapPdfText(paragraph, usableWidth, fontSize));
+      });
+
+      const pages = [];
+      let currentPage = [];
+      let cursorY = pageHeight - marginTop;
+      const minY = marginBottom;
+
+      wrappedLines.forEach((line, index) => {
+        if (cursorY < minY) {
+          pages.push(currentPage);
+          currentPage = [];
+          cursorY = pageHeight - marginTop;
+        }
+
+        currentPage.push({ text: line, x: marginX, y: cursorY, size: index === 0 ? 18 : fontSize, bold: index === 0 });
+        cursorY -= index === 0 ? 24 : lineHeight;
+      });
+      pages.push(currentPage);
+      const contentObjects = [];
+      const fontObjectId = 3;
+
+      pages.forEach((page) => {
+        const contentLines = ['BT'];
+        let currentFontSize = null;
+        page.forEach((entry) => {
+          if (currentFontSize !== entry.size) {
+            contentLines.push(`/F1 ${entry.size} Tf`);
+            currentFontSize = entry.size;
+          }
+          contentLines.push(`1 0 0 1 ${entry.x.toFixed(2)} ${entry.y.toFixed(2)} Tm`);
+          contentLines.push(`(${escapePdfString(entry.text)}) Tj`);
+        });
+        contentLines.push('ET');
+        const contentStream = contentLines.join('\n');
+        contentObjects.push(contentStream);
+      });
+
+      const catalogObjectId = 1;
+      const pagesObjectId = 2;
+      let nextObjectId = 4;
+      const pageObjectIds = pages.map(() => nextObjectId++);
+      const contentObjectIds = pages.map(() => nextObjectId++);
+
+      const pdfObjects = [];
+      pdfObjects[catalogObjectId] = `<< /Type /Catalog /Pages ${pagesObjectId} 0 R >>`;
+      pdfObjects[pagesObjectId] = `<< /Type /Pages /Kids [${pageObjectIds.map((id) => `${id} 0 R`).join(' ')}] /Count ${pageObjectIds.length} >>`;
+      pdfObjects[fontObjectId] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>`;
+
+      pageObjectIds.forEach((pageObjectId, index) => {
+        const contentObjectId = contentObjectIds[index];
+        pdfObjects[pageObjectId] = `<< /Type /Page /Parent ${pagesObjectId} 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 ${fontObjectId} 0 R >> >> /Contents ${contentObjectId} 0 R >>`;
+        pdfObjects[contentObjectId] = contentObjects[index];
+      });
+
+      let pdf = '%PDF-1.4\n';
+      const offsets = [0];
+      for (let objectId = 1; objectId < pdfObjects.length; objectId += 1) {
+        const objectBody = pdfObjects[objectId];
+        if (!objectBody) continue;
+        offsets[objectId] = pdf.length;
+        pdf += `${objectId} 0 obj\n`;
+        if (objectId >= 4) {
+          const streamBytes = objectBody;
+          pdf += `<< /Length ${streamBytes.length} >>\nstream\n${streamBytes}\nendstream\nendobj\n`;
+        } else {
+          pdf += `${objectBody}\nendobj\n`;
+        }
+      }
+
+      const xrefStart = pdf.length;
+      const maxObjectId = pdfObjects.length - 1;
+      pdf += `xref\n0 ${maxObjectId + 1}\n`;
+      pdf += '0000000000 65535 f \n';
+      for (let objectId = 1; objectId <= maxObjectId; objectId += 1) {
+        const offset = offsets[objectId] || 0;
+        pdf += `${String(offset).padStart(10, '0')} 00000 n \n`;
+      }
+      pdf += `trailer\n<< /Size ${maxObjectId + 1} /Root ${catalogObjectId} 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+      return pdf;
+    }
+
+    function wrapPdfText(text, maxWidth, fontSize) {
+      const approxCharWidth = fontSize * 0.52;
+      const maxChars = Math.max(20, Math.floor(maxWidth / approxCharWidth));
+      if (text.length <= maxChars) return [text];
+
+      const words = text.split(/\s+/);
+      const lines = [];
+      let line = '';
+
+      for (const word of words) {
+        const nextLine = line ? `${line} ${word}` : word;
+        if (nextLine.length > maxChars) {
+          if (line) lines.push(line);
+          line = word;
+        } else {
+          line = nextLine;
+        }
+      }
+
+      if (line) lines.push(line);
+      return lines.length ? lines : [''];
+    }
+
+    function normalizePdfText(value) {
+      return String(value)
+        .replaceAll('\r', '')
+        .replaceAll('–', '-')
+        .replaceAll('—', '-')
+        .replaceAll('’', "'")
+        .replaceAll('“', '"')
+        .replaceAll('”', '"')
+        .replaceAll('•', '-')
+        .replace(/[^\x09\x0A\x0D\x20-\x7E]/g, '?');
+    }
+
+    function escapePdfString(value) {
+      return normalizePdfText(value)
+        .replaceAll('\\', '\\\\')
+        .replaceAll('(', '\\(')
+        .replaceAll(')', '\\)');
+    }
+
+    function renderQuestionnaire() {
+      if (!state.questions.length) {
+        questionnaireEl.innerHTML = '';
+        emptyStateEl.style.display = 'block';
+        return;
+      }
+
+      const groups = groupBySection();
+      questionnaireEl.innerHTML = '';
+
+      for (const [sectionName, questions] of groups.entries()) {
+        const sectionId = slug(sectionName);
+        const sectionEl = document.createElement('article');
+        sectionEl.className = 'section';
+        sectionEl.innerHTML = `
+          <div class="section-header">
+            <div class="section-title">
+              <h2>${escapeHtml(sectionName)}</h2>
+              <small>${questions.length} question${questions.length === 1 ? '' : 's'}</small>
+            </div>
+            <div class="section-badge" id="badge-${sectionId}">Section score: -</div>
+          </div>
+          <div class="questions" id="questions-${sectionId}"></div>
+          <div class="comments">
+            <label for="comments-${sectionId}">Section comments</label>
+            <textarea id="comments-${sectionId}" placeholder="Add comments, follow-up actions, and observations for the final report."></textarea>
+          </div>
+          <div class="danger-row" id="danger-${sectionId}"></div>
+        `;
+
+        questionnaireEl.appendChild(sectionEl);
+        const questionsContainer = sectionEl.querySelector(`#questions-${sectionId}`);
+
+        questions.forEach((question) => {
+          const questionEl = document.createElement('div');
+          questionEl.className = 'question';
+          const currentResponse = state.responses[question.questionId] ?? '';
+          const optionsMarkup = ['<option value="">Select an answer</option>'].concat(
+            question.answers.map((answer) => `<option value="${answer.score}">${escapeHtml(answer.label)} (Score ${answer.score})</option>`)
+          ).join('');
+
+          questionEl.innerHTML = `
+            <div>
+              <h3>${escapeHtml(question.question)}</h3>
+              <div class="meta">
+                <span class="tag">ID ${escapeHtml(question.questionId)}</span>
+                <span class="tag ${question.critical ? 'critical' : ''}">${question.critical ? 'Critical' : 'Standard'}</span>
+              </div>
+            </div>
+            <div class="select-wrap">
+              <select id="question-${question.questionId}" data-question-id="${escapeHtml(question.questionId)}">
+                ${optionsMarkup}
+              </select>
+              <div class="select-score" id="score-${question.questionId}">No answer selected</div>
+            </div>
+          `;
+
+          questionsContainer.appendChild(questionEl);
+          const selectEl = questionEl.querySelector('select');
+          selectEl.value = currentResponse;
+          selectEl.addEventListener('change', (event) => {
+            state.responses[question.questionId] = event.target.value;
+            updateSummary();
+          });
+          updateQuestionScoreLabel(question.questionId);
+        });
+
+        const commentsEl = sectionEl.querySelector(`#comments-${sectionId}`);
+        commentsEl.value = state.comments[sectionName] || '';
+        commentsEl.addEventListener('input', (event) => {
+          state.comments[sectionName] = event.target.value;
+        });
+      }
+    }
+
+    function groupBySection() {
+      const map = new Map();
+      for (const question of state.questions) {
+        if (!map.has(question.section)) map.set(question.section, []);
+        map.get(question.section).push(question);
+      }
+      return map;
+    }
+
+    function updateQuestionScoreLabel(questionId) {
+      const question = state.questions.find((item) => item.questionId === questionId);
+      const scoreLabel = document.getElementById(`score-${questionId}`);
+      if (!question || !scoreLabel) return;
+
+      const response = state.responses[questionId];
+      if (!response) {
+        scoreLabel.textContent = 'No answer selected';
+        return;
+      }
+
+      const selectedAnswer = question.answers.find((answer) => String(answer.score) === String(response));
+      scoreLabel.textContent = selectedAnswer ? `Selected: ${selectedAnswer.label} (Score ${selectedAnswer.score})` : 'Selected answer';
+    }
+
+    function updateSummary() {
+      if (!state.questions.length) {
+        overallScoreEl.textContent = '-';
+        answeredCountEl.textContent = '0/0';
+        dangerCountEl.textContent = '0';
+        compliantCountEl.textContent = '0';
+        statusLineEl.innerHTML = '<span class="chip warn">No CSV loaded yet</span>';
+        return;
+      }
+
+      let totalScore = 0;
+      let answered = 0;
+      let compliant = 0;
+      let dangers = 0;
+
+      state.questions.forEach((question) => {
+        const value = state.responses[question.questionId];
+        updateQuestionScoreLabel(question.questionId);
+        if (!value) return;
+        answered += 1;
+        const score = Number(value);
+        totalScore += score;
+        if (score === 4) compliant += 1;
+        if (question.critical && score < 4) dangers += 1;
+      });
+
+      const average = answered ? (totalScore / answered).toFixed(2) : '-';
+      overallScoreEl.textContent = average;
+      answeredCountEl.textContent = `${answered}/${state.questions.length}`;
+      dangerCountEl.textContent = String(dangers);
+      compliantCountEl.textContent = String(compliant);
+
+      const criticalAnswered = state.questions.filter((question) => question.critical && state.responses[question.questionId]).length;
+      const criticalTotal = state.questions.filter((question) => question.critical).length;
+      const missing = state.questions.length - answered;
+      statusLineEl.innerHTML = [
+        `<span class="chip ok">${answered} answered</span>`,
+        `<span class="chip warn">${missing} pending</span>`,
+        `<span class="chip danger">${dangers} critical danger${dangers === 1 ? '' : 's'}</span>`,
+        `<span class="chip">${criticalAnswered}/${criticalTotal} critical reviewed</span>`
+      ].join('');
+
+      updateSectionSummaries();
+      renderReport();
+    }
+
+    function updateSectionSummaries() {
+      const groups = groupBySection();
+      for (const [sectionName, questions] of groups.entries()) {
+        const sectionId = slug(sectionName);
+        const badge = document.getElementById(`badge-${sectionId}`);
+        const dangerRow = document.getElementById(`danger-${sectionId}`);
+        if (!badge || !dangerRow) continue;
+
+        let sum = 0;
+        let answered = 0;
+        const dangers = [];
+
+        questions.forEach((question) => {
+          const response = state.responses[question.questionId];
+          if (!response) return;
+          answered += 1;
+          const score = Number(response);
+          sum += score;
+          if (question.critical && score < 4) {
+            dangers.push(`${question.questionId} - ${question.question}`);
+          }
+        });
+
+        badge.textContent = answered ? `Section score: ${(sum / answered).toFixed(2)}` : 'Section score: -';
+        if (dangers.length) {
+          dangerRow.style.display = 'block';
+          dangerRow.textContent = `Danger: critical non-compliance detected in ${dangers.length} item${dangers.length === 1 ? '' : 's'}: ${dangers.join('; ')}`;
+        } else {
+          dangerRow.style.display = 'none';
+          dangerRow.textContent = '';
+        }
+      }
+    }
+
+    function generateReport() {
+      if (!state.questions.length) return 'No questionnaire loaded.';
+
+      const groups = groupBySection();
+      const now = new Date().toLocaleString();
+      const lines = [];
+      lines.push('Pharmaceutical Factory Compliance Review');
+      lines.push(`Source file: ${state.currentFileName}`);
+      lines.push(`Generated: ${now}`);
+      lines.push('');
+
+      let totalScore = 0;
+      let answered = 0;
+      let dangers = 0;
+      let compliant = 0;
+
+      for (const [sectionName, questions] of groups.entries()) {
+        lines.push(`SECTION: ${sectionName}`);
+
+        let sectionScore = 0;
+        let sectionAnswered = 0;
+        const sectionDangers = [];
+
+        questions.forEach((question) => {
+          const response = state.responses[question.questionId];
+          const selectedAnswer = question.answers.find((answer) => String(answer.score) === String(response));
+          const answerText = selectedAnswer ? `${selectedAnswer.label} (Score ${selectedAnswer.score})` : 'Not answered';
+          lines.push(`- ${question.questionId}: ${question.question}`);
+          lines.push(`  Answer: ${answerText}`);
+          lines.push(`  Critical: ${question.critical ? 'Yes' : 'No'}`);
+
+          if (response) {
+            const score = Number(response);
+            totalScore += score;
+            answered += 1;
+            sectionScore += score;
+            sectionAnswered += 1;
+            if (score === 4) compliant += 1;
+            if (question.critical && score < 4) {
+              dangers += 1;
+              sectionDangers.push(`${question.questionId} (${score})`);
+            }
+          }
+        });
+
+        const comments = state.comments[sectionName] || '';
+        lines.push(`Section average: ${sectionAnswered ? (sectionScore / sectionAnswered).toFixed(2) : '-'}`);
+        lines.push(`Comments: ${comments || 'None recorded'}`);
+        lines.push(`Danger items: ${sectionDangers.length ? sectionDangers.join(', ') : 'None'}`);
+        lines.push('');
+      }
+
+      lines.push('SUMMARY');
+      lines.push(`Answered: ${answered}/${state.questions.length}`);
+      lines.push(`Overall average score: ${answered ? (totalScore / answered).toFixed(2) : '-'}`);
+      lines.push(`Compliant answers (score 4): ${compliant}`);
+      lines.push(`Critical dangers: ${dangers}`);
+
+      return lines.join('\n');
+    }
+
+    function setStatus(message, kind = 'warn') {
+      const className = kind === 'ok' ? 'chip ok' : kind === 'danger' ? 'chip danger' : 'chip warn';
+      statusLineEl.innerHTML = `<span class="${className}">${escapeHtml(message)}</span>`;
+    }
+
+    function slug(text) {
+      return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    loadQuestionnaire();
+    renderReport();
+  </script>
+</body>
+</html>
