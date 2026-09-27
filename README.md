@@ -10,18 +10,18 @@ This folder contains a static HTML questionnaire applet and a sample CSV file.
 ## How it works
 
 - Questions are loaded from a CSV file.
-- Each question uses a drop-down with 4 possible scores.
-- Score `4` means compliant.
-- Questions marked `Yes` in the `critical` column are treated as critical.
-- If a critical question is scored below `4`, the app flags it as a danger item.
-- Each section has a comments box that is included in the final report.
+- Each question uses one continuous display number from `9.1` through `9.38`.
+- Each question uses a score-only drop-down with scores `1` through `4` and `Not Applicable`.
+- `Not Applicable` responses are excluded from the average and score totals.
+- The selected score reveals the wording in the `Audit scoring guide`.
+- Each question has its own `Comments and findings` field, included in the final report.
 
 ## CSV columns
 
 - `section`
 - `question_id`
 - `question`
-- `critical`
+- `critical` (retained for compatibility, not used)
 - `answer_1_label`
 - `answer_1_score`
 - `answer_2_label`

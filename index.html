@@ -221,6 +221,32 @@
       margin-bottom: 14px;
     }
 
+    .section-toggle {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border: 0;
+      padding: 0;
+      color: inherit;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .section-toggle::after {
+      content: '+';
+      color: var(--accent);
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .section.is-open .section-toggle::after { content: '-'; }
+
+    .section-body { display: none; }
+    .section.is-open .section-body { display: block; }
+
     .section-title {
       display: flex;
       flex-direction: column;
@@ -228,6 +254,11 @@
     }
 
     .section-title h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .section-title-heading {
       margin: 0;
       font-size: 22px;
     }
@@ -288,12 +319,6 @@
       border: 1px solid rgba(255, 255, 255, 0.07);
     }
 
-    .tag.critical {
-      background: rgba(255, 107, 107, 0.12);
-      border-color: rgba(255, 107, 107, 0.26);
-      color: #ffcbcb;
-    }
-
     .select-wrap {
       display: grid;
       gap: 8px;
@@ -323,14 +348,29 @@
       min-height: 18px;
     }
 
-    .danger-row {
-      margin-top: 12px;
-      padding: 12px 14px;
-      border-radius: 12px;
-      background: rgba(255, 107, 107, 0.11);
-      border: 1px solid rgba(255, 107, 107, 0.28);
-      color: #ffd2d2;
+    .scoring-guide {
       display: none;
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(76, 201, 164, 0.08);
+      border: 1px solid rgba(76, 201, 164, 0.18);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .scoring-guide.visible { display: block; }
+
+    .question-comments {
+      grid-column: 1 / -1;
+      display: grid;
+      gap: 8px;
+    }
+
+    .question-comments label {
+      color: var(--muted);
+      font-size: 13px;
     }
 
     .comments {
@@ -486,6 +526,15 @@
       border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
 
+    .report-section > summary { cursor: pointer; list-style: none; }
+    .report-section > summary::-webkit-details-marker { display: none; }
+    .report-section > summary::after {
+      content: '+';
+      color: var(--accent);
+      font-size: 22px;
+    }
+    .report-section[open] > summary::after { content: '-'; }
+
     .report-section-header {
       display: flex;
       flex-wrap: wrap;
@@ -532,7 +581,7 @@
       gap: 8px;
     }
 
-    .report-signature {
+    .reviewer-block {
       padding: 18px;
       display: grid;
       gap: 12px;
@@ -540,7 +589,7 @@
       background: rgba(255, 255, 255, 0.03);
     }
 
-    .signature-line {
+    .reviewer-name-line {
       min-height: 44px;
       display: grid;
       align-items: end;
@@ -623,7 +672,7 @@
       .report-frame,
       .report-section,
       .report-header,
-      .report-signature {
+      .reviewer-block {
         break-inside: avoid;
       }
 
@@ -634,7 +683,7 @@
 
       .report-header,
       .report-section,
-      .report-signature {
+      .reviewer-block {
         background: #fff;
         color: #111;
       }
@@ -656,8 +705,7 @@
         <div class="eyebrow">Pharma Factory Review Tool</div>
         <h1>CSV-driven compliance questionnaire for pharmaceutical factory audits.</h1>
         <p>
-          The questionnaire loads from a fixed CSV source, so non-technical reviewers only need to answer the dropdowns,
-          mark critical items that fail as danger events, and capture section comments for the final report.
+          The questionnaire loads from a fixed CSV source. Select a score or Not Applicable for every item and record comments and findings where needed.
         </p>
         <div class="controls">
           <button class="btn secondary" id="resetBtn" type="button">Reset responses</button>
@@ -676,7 +724,7 @@
             <strong id="answeredCount">0/0</strong>
           </div>
           <div class="stat">
-            <span>Critical dangers</span>
+            <span>Not Applicable</span>
             <strong id="dangerCount">0</strong>
           </div>
           <div class="stat">
@@ -760,6 +808,8 @@
     document.getElementById('resetBtn').addEventListener('click', () => {
       state.responses = {};
       state.comments = {};
+      state.reviewerName = '';
+      reviewerNameEl.value = '';
       state.reportText = '';
       renderQuestionnaire();
       updateSummary();
@@ -857,10 +907,10 @@
       return rows.slice(1).map((row) => {
         const record = Object.fromEntries(headers.map((header, index) => [header, (row[index] || '').trim()]));
         return {
+          chapter: record.chapter || record.section,
           section: record.section,
           questionId: record.question_id,
           question: record.question,
-          critical: /^y(es)?|true|1$/i.test(record.critical),
           answers: [1, 2, 3, 4].map((score) => ({
             label: record[`answer_${score}_label`],
             score: Number(record[`answer_${score}_score`])
@@ -901,56 +951,50 @@
     function buildReportData() {
       if (!state.questions.length) return null;
 
-      const groups = groupBySection();
       const sections = [];
       let totalScore = 0;
       let answered = 0;
-      let dangers = 0;
+      let notApplicable = 0;
       let compliant = 0;
 
-      for (const [sectionName, questions] of groups.entries()) {
+      for (const [chapterName, questions] of groupByChapter().entries()) {
+        const items = [];
         let sectionScore = 0;
         let sectionAnswered = 0;
-        const items = [];
-        const sectionDangers = [];
 
         questions.forEach((question) => {
           const response = state.responses[question.questionId];
           const selectedAnswer = question.answers.find((answer) => String(answer.score) === String(response));
-          const answerText = selectedAnswer ? `${selectedAnswer.label} (Score ${selectedAnswer.score})` : 'Not answered';
-          const score = response ? Number(response) : null;
+          const score = response && response !== 'na' ? Number(response) : null;
+          const answerText = response === 'na' ? 'Not Applicable' : selectedAnswer ? `Score ${selectedAnswer.score}` : 'Not answered';
 
           items.push({
             questionId: question.questionId,
+            section: question.section,
             question: question.question,
             answerText,
-            critical: question.critical,
             score,
-            danger: Boolean(question.critical && score !== null && score < 4)
+            comment: state.comments[question.questionId] || ''
           });
 
-          if (response) {
+          if (response === 'na') {
+            notApplicable += 1;
+          } else if (score !== null) {
             totalScore += score;
             answered += 1;
             sectionScore += score;
             sectionAnswered += 1;
             if (score === 4) compliant += 1;
-            if (question.critical && score < 4) {
-              dangers += 1;
-              sectionDangers.push(`${question.questionId} (${score})`);
-            }
           }
         });
 
         sections.push({
-          sectionName,
+          sectionName: chapterName,
           questions,
           items,
           sectionAnswered,
           sectionScore,
-          average: sectionAnswered ? (sectionScore / sectionAnswered).toFixed(2) : '-',
-          comments: state.comments[sectionName] || '',
-          sectionDangers
+          average: sectionAnswered ? (sectionScore / sectionAnswered).toFixed(2) : '-'
         });
       }
 
@@ -963,7 +1007,7 @@
         totalScore,
         average: answered ? (totalScore / answered).toFixed(2) : '-',
         compliant,
-        dangers,
+        notApplicable,
         sections
       };
     }
@@ -980,41 +1024,47 @@
       state.reportText = generateReportText(data);
       reportPreviewEl.className = 'report-preview';
       reportPreviewEl.innerHTML = renderReportHtml(data);
+      reportPreviewEl.querySelectorAll('.report-section').forEach((section) => {
+        section.addEventListener('toggle', () => {
+          if (!section.open) return;
+          reportPreviewEl.querySelectorAll('.report-section').forEach((otherSection) => {
+            if (otherSection !== section) otherSection.open = false;
+          });
+        });
+      });
     }
 
     function renderReportHtml(data) {
-      const sectionMarkup = data.sections.map((section) => `
-        <section class="report-section">
-          <div class="report-section-header">
+      const sectionMarkup = data.sections.map((section, index) => `
+        <details class="report-section" ${index === 0 ? 'open' : ''}>
+          <summary class="report-section-header">
             <div>
               <h4>${escapeHtml(section.sectionName)}</h4>
               <div class="report-metadata">
                 <span>${section.questions.length} question${section.questions.length === 1 ? '' : 's'}</span>
                 <span>Average score: ${section.average}</span>
-                <span>Critical danger items: ${section.sectionDangers.length}</span>
+                <span>Not Applicable: ${data.notApplicable}</span>
               </div>
             </div>
             <span class="section-badge">Section score: ${section.average}</span>
-          </div>
+          </summary>
           <div class="report-section-list">
             ${section.items.map((item) => `
               <div class="report-question-row">
-                <strong>${escapeHtml(item.question)}</strong>
+                <strong>${escapeHtml(item.questionId)} - ${escapeHtml(item.question)}</strong>
                 <div class="report-question-meta">
-                  <span class="tag">ID ${escapeHtml(item.questionId)}</span>
-                  <span class="tag ${item.critical ? 'critical' : ''}">${item.critical ? 'Critical' : 'Standard'}</span>
+                  <span class="tag">${escapeHtml(item.section)}</span>
                   <span class="tag">${escapeHtml(item.answerText)}</span>
-                  ${item.danger ? '<span class="tag critical">Danger</span>' : ''}
                 </div>
+                <div class="report-question-meta"><span class="tag">Comments and findings</span> ${escapeHtml(item.comment || 'None recorded')}</div>
               </div>
             `).join('')}
           </div>
           <div class="report-comments">
-            <span class="tag">Section comments</span>
-            <p>${escapeHtml(section.comments || 'None recorded')}</p>
-            <p>Danger items: ${section.sectionDangers.length ? escapeHtml(section.sectionDangers.join(', ')) : 'None'}</p>
+            <span class="tag">Audit scoring summary</span>
+            <p>Not Applicable responses are excluded from the average.</p>
           </div>
-        </section>
+        </details>
       `).join('');
 
       return `
@@ -1030,23 +1080,21 @@
               <div class="report-summary-card"><span>Answered</span><strong>${data.answered}/${data.totalQuestions}</strong></div>
               <div class="report-summary-card"><span>Overall average</span><strong>${data.average}</strong></div>
               <div class="report-summary-card"><span>Compliant answers</span><strong>${data.compliant}</strong></div>
-              <div class="report-summary-card"><span>Critical dangers</span><strong>${data.dangers}</strong></div>
+              <div class="report-summary-card"><span>Not Applicable</span><strong>${data.notApplicable}</strong></div>
             </div>
           </div>
           ${sectionMarkup}
-          <div class="report-signature">
-            <h4>Reviewer signature</h4>
+          ${data.reviewerName ? `
+          <div class="reviewer-block">
+            <h4>Reviewer</h4>
             <div class="reviewer-grid">
               <div class="field-group">
                 <label>Name</label>
-                <div class="signature-line">${escapeHtml(data.reviewerName || 'Not entered')}</div>
-              </div>
-              <div class="field-group">
-                <label>Signed</label>
-                <div class="signature-line">____________________________</div>
+                <div class="reviewer-name-line">${escapeHtml(data.reviewerName)}</div>
               </div>
             </div>
           </div>
+          ` : ''}
         </div>
       `;
     }
@@ -1065,12 +1113,11 @@
         lines.push(`SECTION: ${section.sectionName}`);
         section.items.forEach((item) => {
           lines.push(`- ${item.questionId}: ${item.question}`);
+          lines.push(`  Section: ${item.section}`);
           lines.push(`  Answer: ${item.answerText}`);
-          lines.push(`  Critical: ${item.critical ? 'Yes' : 'No'}`);
+          lines.push(`  Comments and findings: ${item.comment || 'None recorded'}`);
         });
         lines.push(`Section average: ${section.average}`);
-        lines.push(`Comments: ${section.comments || 'None recorded'}`);
-        lines.push(`Danger items: ${section.sectionDangers.length ? section.sectionDangers.join(', ') : 'None'}`);
         lines.push('');
       }
 
@@ -1078,8 +1125,7 @@
       lines.push(`Answered: ${data.answered}/${data.totalQuestions}`);
       lines.push(`Overall average score: ${data.average}`);
       lines.push(`Compliant answers (score 4): ${data.compliant}`);
-      lines.push(`Critical dangers: ${data.dangers}`);
-      lines.push(`Reviewer signature: ${data.reviewerName || 'Not entered'}`);
+      lines.push(`Not Applicable: ${data.notApplicable}`);
 
       return lines.join('\n');
     }
@@ -1249,46 +1295,48 @@
         return;
       }
 
-      const groups = groupBySection();
       questionnaireEl.innerHTML = '';
+      const groups = groupByChapter();
+      let firstChapter = true;
 
-      for (const [sectionName, questions] of groups.entries()) {
-        const sectionId = slug(sectionName);
+      for (const [chapterName, questions] of groups.entries()) {
+        const sectionId = `chapter-${slug(chapterName)}`;
         const sectionEl = document.createElement('article');
-        sectionEl.className = 'section';
+        sectionEl.className = `section${firstChapter ? ' is-open' : ''}`;
         sectionEl.innerHTML = `
           <div class="section-header">
-            <div class="section-title">
-              <h2>${escapeHtml(sectionName)}</h2>
-              <small>${questions.length} question${questions.length === 1 ? '' : 's'}</small>
-            </div>
-            <div class="section-badge" id="badge-${sectionId}">Section score: -</div>
+            <button class="section-toggle" type="button" aria-expanded="${firstChapter}" aria-controls="${sectionId}-body">
+              <span class="section-title">
+                <h2 class="section-title-heading">${escapeHtml(chapterName)}</h2>
+                <small>${questions.length} question${questions.length === 1 ? '' : 's'}</small>
+              </span>
+              <span class="section-badge">Chapter</span>
+            </button>
           </div>
-          <div class="questions" id="questions-${sectionId}"></div>
-          <div class="comments">
-            <label for="comments-${sectionId}">Section comments</label>
-            <textarea id="comments-${sectionId}" placeholder="Add comments, follow-up actions, and observations for the final report."></textarea>
+          <div class="section-body" id="${sectionId}-body">
+            <div class="questions"></div>
           </div>
-          <div class="danger-row" id="danger-${sectionId}"></div>
         `;
-
         questionnaireEl.appendChild(sectionEl);
-        const questionsContainer = sectionEl.querySelector(`#questions-${sectionId}`);
+        const toggleEl = sectionEl.querySelector('.section-toggle');
+        toggleEl.addEventListener('click', () => toggleQuestionnaireSection(sectionEl));
+        const questionsContainer = sectionEl.querySelector('.questions');
 
         questions.forEach((question) => {
           const questionEl = document.createElement('div');
           questionEl.className = 'question';
           const currentResponse = state.responses[question.questionId] ?? '';
-          const optionsMarkup = ['<option value="">Select an answer</option>'].concat(
-            question.answers.map((answer) => `<option value="${answer.score}">${escapeHtml(answer.label)} (Score ${answer.score})</option>`)
-          ).join('');
+          const optionsMarkup = ['<option value="">Select a score</option>']
+            .concat(question.answers.map((answer) => `<option value="${answer.score}">${answer.score}</option>`))
+            .concat('<option value="na">Not Applicable</option>')
+            .join('');
 
           questionEl.innerHTML = `
             <div>
-              <h3>${escapeHtml(question.question)}</h3>
+              <h3>${escapeHtml(question.questionId)} - ${escapeHtml(question.question)}</h3>
               <div class="meta">
-                <span class="tag">ID ${escapeHtml(question.questionId)}</span>
-                <span class="tag ${question.critical ? 'critical' : ''}">${question.critical ? 'Critical' : 'Standard'}</span>
+                <span class="tag">Question ${escapeHtml(question.questionId)}</span>
+                <span class="tag">${escapeHtml(question.section)}</span>
               </div>
             </div>
             <div class="select-wrap">
@@ -1296,6 +1344,14 @@
                 ${optionsMarkup}
               </select>
               <div class="select-score" id="score-${question.questionId}">No answer selected</div>
+              <div class="scoring-guide" id="guide-${question.questionId}">
+                <strong>Audit scoring guide</strong>
+                <div id="guide-text-${question.questionId}"></div>
+              </div>
+            </div>
+            <div class="question-comments">
+              <label for="comments-${question.questionId}">Comments and findings</label>
+              <textarea id="comments-${question.questionId}" placeholder="Write comments and findings for this question."></textarea>
             </div>
           `;
 
@@ -1306,22 +1362,32 @@
             state.responses[question.questionId] = event.target.value;
             updateSummary();
           });
+          const commentsEl = document.getElementById(`comments-${question.questionId}`);
+          commentsEl.value = state.comments[question.questionId] || '';
+          commentsEl.addEventListener('input', (event) => {
+            state.comments[question.questionId] = event.target.value;
+          });
           updateQuestionScoreLabel(question.questionId);
         });
-
-        const commentsEl = sectionEl.querySelector(`#comments-${sectionId}`);
-        commentsEl.value = state.comments[sectionName] || '';
-        commentsEl.addEventListener('input', (event) => {
-          state.comments[sectionName] = event.target.value;
-        });
+        firstChapter = false;
       }
     }
 
-    function groupBySection() {
+    function toggleQuestionnaireSection(sectionEl) {
+      const shouldOpen = !sectionEl.classList.contains('is-open');
+      document.querySelectorAll('#questionnaire .section').forEach((section) => {
+        section.classList.toggle('is-open', shouldOpen && section === sectionEl);
+        const toggle = section.querySelector('.section-toggle');
+        if (toggle) toggle.setAttribute('aria-expanded', String(shouldOpen && section === sectionEl));
+      });
+    }
+
+    function groupByChapter() {
       const map = new Map();
       for (const question of state.questions) {
-        if (!map.has(question.section)) map.set(question.section, []);
-        map.get(question.section).push(question);
+        const chapterName = question.chapter || question.section;
+        if (!map.has(chapterName)) map.set(chapterName, []);
+        map.get(chapterName).push(question);
       }
       return map;
     }
@@ -1329,16 +1395,29 @@
     function updateQuestionScoreLabel(questionId) {
       const question = state.questions.find((item) => item.questionId === questionId);
       const scoreLabel = document.getElementById(`score-${questionId}`);
-      if (!question || !scoreLabel) return;
+      const guide = document.getElementById(`guide-${questionId}`);
+      const guideText = document.getElementById(`guide-text-${questionId}`);
+      if (!question || !scoreLabel || !guide || !guideText) return;
 
       const response = state.responses[questionId];
       if (!response) {
         scoreLabel.textContent = 'No answer selected';
+        guide.classList.remove('visible');
+        guideText.textContent = '';
+        return;
+      }
+
+      if (response === 'na') {
+        scoreLabel.textContent = 'Not Applicable';
+        guide.classList.remove('visible');
+        guideText.textContent = '';
         return;
       }
 
       const selectedAnswer = question.answers.find((answer) => String(answer.score) === String(response));
-      scoreLabel.textContent = selectedAnswer ? `Selected: ${selectedAnswer.label} (Score ${selectedAnswer.score})` : 'Selected answer';
+      scoreLabel.textContent = selectedAnswer ? `Selected score: ${selectedAnswer.score}` : 'Selected score';
+      guideText.textContent = selectedAnswer ? selectedAnswer.label : '';
+      guide.classList.toggle('visible', Boolean(selectedAnswer));
     }
 
     function updateSummary() {
@@ -1354,132 +1433,36 @@
       let totalScore = 0;
       let answered = 0;
       let compliant = 0;
-      let dangers = 0;
+      let notApplicable = 0;
 
       state.questions.forEach((question) => {
         const value = state.responses[question.questionId];
         updateQuestionScoreLabel(question.questionId);
         if (!value) return;
+        if (value === 'na') {
+          notApplicable += 1;
+          return;
+        }
         answered += 1;
         const score = Number(value);
         totalScore += score;
         if (score === 4) compliant += 1;
-        if (question.critical && score < 4) dangers += 1;
       });
 
       const average = answered ? (totalScore / answered).toFixed(2) : '-';
       overallScoreEl.textContent = average;
       answeredCountEl.textContent = `${answered}/${state.questions.length}`;
-      dangerCountEl.textContent = String(dangers);
+      dangerCountEl.textContent = String(notApplicable);
       compliantCountEl.textContent = String(compliant);
 
-      const criticalAnswered = state.questions.filter((question) => question.critical && state.responses[question.questionId]).length;
-      const criticalTotal = state.questions.filter((question) => question.critical).length;
-      const missing = state.questions.length - answered;
+      const missing = state.questions.length - answered - notApplicable;
       statusLineEl.innerHTML = [
         `<span class="chip ok">${answered} answered</span>`,
         `<span class="chip warn">${missing} pending</span>`,
-        `<span class="chip danger">${dangers} critical danger${dangers === 1 ? '' : 's'}</span>`,
-        `<span class="chip">${criticalAnswered}/${criticalTotal} critical reviewed</span>`
+        `<span class="chip">${notApplicable} Not Applicable</span>`
       ].join('');
 
-      updateSectionSummaries();
       renderReport();
-    }
-
-    function updateSectionSummaries() {
-      const groups = groupBySection();
-      for (const [sectionName, questions] of groups.entries()) {
-        const sectionId = slug(sectionName);
-        const badge = document.getElementById(`badge-${sectionId}`);
-        const dangerRow = document.getElementById(`danger-${sectionId}`);
-        if (!badge || !dangerRow) continue;
-
-        let sum = 0;
-        let answered = 0;
-        const dangers = [];
-
-        questions.forEach((question) => {
-          const response = state.responses[question.questionId];
-          if (!response) return;
-          answered += 1;
-          const score = Number(response);
-          sum += score;
-          if (question.critical && score < 4) {
-            dangers.push(`${question.questionId} - ${question.question}`);
-          }
-        });
-
-        badge.textContent = answered ? `Section score: ${(sum / answered).toFixed(2)}` : 'Section score: -';
-        if (dangers.length) {
-          dangerRow.style.display = 'block';
-          dangerRow.textContent = `Danger: critical non-compliance detected in ${dangers.length} item${dangers.length === 1 ? '' : 's'}: ${dangers.join('; ')}`;
-        } else {
-          dangerRow.style.display = 'none';
-          dangerRow.textContent = '';
-        }
-      }
-    }
-
-    function generateReport() {
-      if (!state.questions.length) return 'No questionnaire loaded.';
-
-      const groups = groupBySection();
-      const now = new Date().toLocaleString();
-      const lines = [];
-      lines.push('Pharmaceutical Factory Compliance Review');
-      lines.push(`Source file: ${state.currentFileName}`);
-      lines.push(`Generated: ${now}`);
-      lines.push('');
-
-      let totalScore = 0;
-      let answered = 0;
-      let dangers = 0;
-      let compliant = 0;
-
-      for (const [sectionName, questions] of groups.entries()) {
-        lines.push(`SECTION: ${sectionName}`);
-
-        let sectionScore = 0;
-        let sectionAnswered = 0;
-        const sectionDangers = [];
-
-        questions.forEach((question) => {
-          const response = state.responses[question.questionId];
-          const selectedAnswer = question.answers.find((answer) => String(answer.score) === String(response));
-          const answerText = selectedAnswer ? `${selectedAnswer.label} (Score ${selectedAnswer.score})` : 'Not answered';
-          lines.push(`- ${question.questionId}: ${question.question}`);
-          lines.push(`  Answer: ${answerText}`);
-          lines.push(`  Critical: ${question.critical ? 'Yes' : 'No'}`);
-
-          if (response) {
-            const score = Number(response);
-            totalScore += score;
-            answered += 1;
-            sectionScore += score;
-            sectionAnswered += 1;
-            if (score === 4) compliant += 1;
-            if (question.critical && score < 4) {
-              dangers += 1;
-              sectionDangers.push(`${question.questionId} (${score})`);
-            }
-          }
-        });
-
-        const comments = state.comments[sectionName] || '';
-        lines.push(`Section average: ${sectionAnswered ? (sectionScore / sectionAnswered).toFixed(2) : '-'}`);
-        lines.push(`Comments: ${comments || 'None recorded'}`);
-        lines.push(`Danger items: ${sectionDangers.length ? sectionDangers.join(', ') : 'None'}`);
-        lines.push('');
-      }
-
-      lines.push('SUMMARY');
-      lines.push(`Answered: ${answered}/${state.questions.length}`);
-      lines.push(`Overall average score: ${answered ? (totalScore / answered).toFixed(2) : '-'}`);
-      lines.push(`Compliant answers (score 4): ${compliant}`);
-      lines.push(`Critical dangers: ${dangers}`);
-
-      return lines.join('\n');
     }
 
     function setStatus(message, kind = 'warn') {
