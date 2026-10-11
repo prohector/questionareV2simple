@@ -35,9 +35,9 @@
     }
 
     .shell {
-      max-width: 1400px;
+      max-width: 1320px;
       margin: 0 auto;
-      padding: 24px;
+      padding: 18px 24px 48px;
     }
 
     .hero {
@@ -60,7 +60,7 @@
     }
 
     .hero-panel {
-      padding: 28px;
+      padding: 22px 26px;
       position: relative;
       overflow: hidden;
     }
@@ -91,7 +91,7 @@
 
     h1 {
       margin: 16px 0 12px;
-      font-size: clamp(30px, 4vw, 52px);
+      font-size: clamp(28px, 3vw, 42px);
       line-height: 1.03;
       letter-spacing: -0.04em;
     }
@@ -148,12 +148,86 @@
       filter: brightness(1.05);
     }
 
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+      transform: none;
+      filter: none;
+    }
+
     .summary {
       padding: 18px;
       display: grid;
       gap: 12px;
       align-content: start;
     }
+
+    .workspace-bar {
+      position: sticky;
+      top: 12px;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) minmax(240px, 1.5fr) auto auto;
+      gap: 14px;
+      align-items: center;
+      margin: 0 0 18px;
+      padding: 12px 14px;
+      background: rgba(15, 23, 32, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+      backdrop-filter: blur(18px);
+    }
+
+    .workspace-bar label {
+      display: grid;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .workspace-bar select { min-height: 40px; }
+
+    .progress-track {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .progress-track span {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent-2), var(--accent));
+      transition: width 0.2s ease;
+    }
+
+    .progress-copy {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .workspace-actions { display: flex; gap: 8px; }
+    .workspace-actions .btn { padding: 9px 12px; }
+
+    .guide-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .guide-toggle input { accent-color: var(--accent); }
 
     .stat-grid {
       display: grid;
@@ -284,12 +358,14 @@
       gap: 12px;
     }
 
+    .question-page { display: grid; gap: 12px; }
+
     .question {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 270px;
       gap: 14px;
       align-items: center;
-      padding: 14px;
+      padding: 12px 14px;
       border-radius: 14px;
       background: rgba(255, 255, 255, 0.035);
       border: 1px solid rgba(255, 255, 255, 0.06);
@@ -297,7 +373,7 @@
 
     .question h3 {
       margin: 0 0 6px;
-      font-size: 16px;
+      font-size: 15px;
       line-height: 1.35;
     }
 
@@ -363,7 +439,8 @@
     .scoring-guide.visible { display: block; }
 
     .question-comments {
-      grid-column: 1 / -1;
+      grid-column: 2;
+      grid-row: 2;
       display: grid;
       gap: 8px;
     }
@@ -387,18 +464,75 @@
 
     textarea {
       width: 100%;
-      min-height: 110px;
+      min-height: 42px;
+      max-height: 42px;
+      overflow-y: hidden;
       resize: vertical;
       border-radius: 14px;
       border: 1px solid rgba(255, 255, 255, 0.10);
       background: rgba(10, 16, 22, 0.72);
       color: var(--text);
       padding: 12px;
+      transition: min-height 0.15s ease, max-height 0.15s ease;
     }
+
+    textarea:focus,
+    textarea.has-content {
+      min-height: 92px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .chapter-pager {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding-top: 4px;
+    }
+
+    .chapter-pager span { color: var(--muted); font-size: 13px; }
+    .chapter-pager .btn { padding: 9px 13px; }
 
     .report-panel {
       margin-top: 18px;
       padding: 18px;
+    }
+
+    .ai-panel {
+      margin-top: 18px;
+      padding: 22px;
+      background: linear-gradient(135deg, rgba(91, 140, 255, 0.12), rgba(76, 201, 164, 0.08));
+      border: 1px solid rgba(91, 140, 255, 0.22);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .ai-panel-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .ai-panel h2 { margin: 0 0 6px; }
+    .ai-panel p { margin: 0; color: var(--muted); line-height: 1.5; }
+    .ai-status {
+      display: inline-flex;
+      margin-top: 16px;
+      padding: 10px 12px;
+      color: #c9d9ff;
+      background: rgba(91, 140, 255, 0.12);
+      border: 1px solid rgba(91, 140, 255, 0.20);
+      border-radius: 10px;
+      font-size: 13px;
+    }
+
+    .ai-output {
+      width: 100%;
+      min-height: 130px;
+      margin-top: 14px;
+      opacity: 0.72;
     }
 
     .submit-panel {
@@ -623,6 +757,8 @@
     @media (max-width: 1080px) {
       .hero { grid-template-columns: 1fr; }
       .question { grid-template-columns: 1fr; }
+      .question-comments { grid-column: 1; grid-row: auto; }
+      .workspace-bar { grid-template-columns: 1fr; position: static; }
     }
 
     @media (max-width: 640px) {
@@ -639,6 +775,7 @@
       .report-summary-grid {
         grid-template-columns: 1fr;
       }
+      .ai-panel-header { flex-direction: column; }
     }
 
     @media print {
@@ -741,6 +878,24 @@
       </aside>
     </section>
 
+    <section class="workspace-bar" aria-label="Audit navigation">
+      <label for="chapterJump">
+        Current chapter
+        <select id="chapterJump"></select>
+      </label>
+      <div>
+        <div class="progress-track" aria-hidden="true"><span id="progressBar"></span></div>
+        <div class="progress-copy"><span id="progressLabel">0 of 0 reviewed</span><span id="progressPercent">0%</span></div>
+      </div>
+      <div class="workspace-actions">
+        <button class="btn secondary" id="nextPendingBtn" type="button">Next pending</button>
+      </div>
+      <label class="guide-toggle" for="showGuideToggle">
+        <input id="showGuideToggle" type="checkbox" />
+        Show Audit scoring guide
+      </label>
+    </section>
+
     <section id="questionnaire" class="content"></section>
 
     <section class="submit-panel">
@@ -753,7 +908,7 @@
       </div>
     </section>
 
-    <section class="report-panel">
+    <section class="report-panel" id="reportPanel">
       <div class="report-toolbar">
         <div>
           <h2>Final Report</h2>
@@ -765,6 +920,18 @@
         </div>
       </div>
       <div id="reportPreview" class="report-preview report-empty">Generate the report after answering the questionnaire.</div>
+    </section>
+
+    <section class="ai-panel" id="aiSummaryPanel">
+      <div class="ai-panel-header">
+        <div>
+          <h2>AI audit summary</h2>
+          <p>A future Cloudflare Worker will turn the completed audit into a concise management summary, key risks, and recommended actions.</p>
+        </div>
+        <button class="btn secondary" id="generateAiBtn" type="button" disabled>Generate AI summary</button>
+      </div>
+      <div class="ai-status">Cloudflare Worker connection not configured yet. Your audit data stays in this browser.</div>
+      <textarea class="ai-output" id="aiSummaryOutput" placeholder="The AI-generated summary will appear here once the Worker endpoint is connected." disabled></textarea>
     </section>
   </main>
 
@@ -804,11 +971,20 @@
     const compliantCountEl = document.getElementById('compliantCount');
     const loadNoteEl = document.getElementById('loadNote');
     const reviewerNameEl = document.getElementById('reviewerName');
+    const chapterJumpEl = document.getElementById('chapterJump');
+    const progressBarEl = document.getElementById('progressBar');
+    const progressLabelEl = document.getElementById('progressLabel');
+    const progressPercentEl = document.getElementById('progressPercent');
+    const nextPendingBtn = document.getElementById('nextPendingBtn');
+    const showGuideToggle = document.getElementById('showGuideToggle');
+    const QUESTIONS_PER_PAGE = 5;
+    const chapterPages = {};
 
     document.getElementById('resetBtn').addEventListener('click', () => {
       state.responses = {};
       state.comments = {};
       state.reviewerName = '';
+      Object.keys(chapterPages).forEach((chapterName) => delete chapterPages[chapterName]);
       reviewerNameEl.value = '';
       state.reportText = '';
       renderQuestionnaire();
@@ -839,6 +1015,27 @@
     reviewerNameEl.addEventListener('input', (event) => {
       state.reviewerName = event.target.value;
       renderReport();
+    });
+
+    chapterJumpEl.addEventListener('change', (event) => {
+      openChapter(event.target.value);
+    });
+
+    nextPendingBtn.addEventListener('click', () => {
+      const pendingQuestion = state.questions.find((question) => !state.responses[question.questionId]);
+      if (!pendingQuestion) return;
+      const chapterName = pendingQuestion.chapter || pendingQuestion.section;
+      const chapterQuestions = groupByChapter().get(chapterName) || [];
+      chapterPages[chapterName] = Math.floor(chapterQuestions.indexOf(pendingQuestion) / QUESTIONS_PER_PAGE);
+      renderQuestionnaire();
+      openChapter(chapterName);
+      const questionEl = document.getElementById(`question-${pendingQuestion.questionId}`);
+      questionEl?.closest('.question')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      questionEl?.focus({ preventScroll: true });
+    });
+
+    showGuideToggle.addEventListener('change', () => {
+      state.questions.forEach((question) => updateQuestionScoreLabel(question.questionId));
     });
 
     function parseCsv(text) {
@@ -1297,15 +1494,15 @@
 
       questionnaireEl.innerHTML = '';
       const groups = groupByChapter();
-      let firstChapter = true;
-
+      chapterJumpEl.innerHTML = Array.from(groups.keys()).map((chapterName) => `<option value="${escapeHtml(chapterName)}">${escapeHtml(chapterName)}</option>`).join('');
       for (const [chapterName, questions] of groups.entries()) {
         const sectionId = `chapter-${slug(chapterName)}`;
         const sectionEl = document.createElement('article');
-        sectionEl.className = `section${firstChapter ? ' is-open' : ''}`;
+        sectionEl.className = 'section';
+        sectionEl.dataset.chapter = chapterName;
         sectionEl.innerHTML = `
           <div class="section-header">
-            <button class="section-toggle" type="button" aria-expanded="${firstChapter}" aria-controls="${sectionId}-body">
+            <button class="section-toggle" type="button" aria-expanded="false" aria-controls="${sectionId}-body">
               <span class="section-title">
                 <h2 class="section-title-heading">${escapeHtml(chapterName)}</h2>
                 <small>${questions.length} question${questions.length === 1 ? '' : 's'}</small>
@@ -1315,71 +1512,121 @@
           </div>
           <div class="section-body" id="${sectionId}-body">
             <div class="questions"></div>
+            <div class="chapter-pager">
+              <button class="btn secondary previous-page" type="button">Previous</button>
+              <span class="page-label"></span>
+              <button class="btn secondary next-page" type="button">Next</button>
+            </div>
           </div>
         `;
         questionnaireEl.appendChild(sectionEl);
         const toggleEl = sectionEl.querySelector('.section-toggle');
         toggleEl.addEventListener('click', () => toggleQuestionnaireSection(sectionEl));
-        const questionsContainer = sectionEl.querySelector('.questions');
-
-        questions.forEach((question) => {
-          const questionEl = document.createElement('div');
-          questionEl.className = 'question';
-          const currentResponse = state.responses[question.questionId] ?? '';
-          const optionsMarkup = ['<option value="">Select a score</option>']
-            .concat(question.answers.map((answer) => `<option value="${answer.score}">${answer.score}</option>`))
-            .concat('<option value="na">Not Applicable</option>')
-            .join('');
-
-          questionEl.innerHTML = `
-            <div>
-              <h3>${escapeHtml(question.questionId)} - ${escapeHtml(question.question)}</h3>
-              <div class="meta">
-                <span class="tag">Question ${escapeHtml(question.questionId)}</span>
-                <span class="tag">${escapeHtml(question.section)}</span>
-              </div>
-            </div>
-            <div class="select-wrap">
-              <select id="question-${question.questionId}" data-question-id="${escapeHtml(question.questionId)}">
-                ${optionsMarkup}
-              </select>
-              <div class="select-score" id="score-${question.questionId}">No answer selected</div>
-              <div class="scoring-guide" id="guide-${question.questionId}">
-                <strong>Audit scoring guide</strong>
-                <div id="guide-text-${question.questionId}"></div>
-              </div>
-            </div>
-            <div class="question-comments">
-              <label for="comments-${question.questionId}">Comments and findings</label>
-              <textarea id="comments-${question.questionId}" placeholder="Write comments and findings for this question."></textarea>
-            </div>
-          `;
-
-          questionsContainer.appendChild(questionEl);
-          const selectEl = questionEl.querySelector('select');
-          selectEl.value = currentResponse;
-          selectEl.addEventListener('change', (event) => {
-            state.responses[question.questionId] = event.target.value;
-            updateSummary();
-          });
-          const commentsEl = document.getElementById(`comments-${question.questionId}`);
-          commentsEl.value = state.comments[question.questionId] || '';
-          commentsEl.addEventListener('input', (event) => {
-            state.comments[question.questionId] = event.target.value;
-          });
-          updateQuestionScoreLabel(question.questionId);
-        });
-        firstChapter = false;
+        renderChapterPage(sectionEl, questions, chapterName);
       }
     }
 
-    function toggleQuestionnaireSection(sectionEl) {
-      const shouldOpen = !sectionEl.classList.contains('is-open');
+    function renderChapterPage(sectionEl, questions, chapterName) {
+      const pageCount = Math.ceil(questions.length / QUESTIONS_PER_PAGE);
+      const page = Math.min(chapterPages[chapterName] || 0, pageCount - 1);
+      chapterPages[chapterName] = page;
+      const questionsContainer = sectionEl.querySelector('.questions');
+      const pageQuestions = questions.slice(page * QUESTIONS_PER_PAGE, (page + 1) * QUESTIONS_PER_PAGE);
+      questionsContainer.innerHTML = pageQuestions.map((question) => {
+        const currentResponse = state.responses[question.questionId] ?? '';
+        const optionsMarkup = ['<option value="">Select a score</option>']
+          .concat(question.answers.map((answer) => `<option value="${answer.score}">${answer.score}</option>`))
+          .concat('<option value="na">Not Applicable</option>')
+          .join('');
+        return `
+          <div class="question">
+            <div>
+              <h3>${escapeHtml(question.questionId)} - ${escapeHtml(question.question)}</h3>
+              <div class="meta"><span class="tag">${escapeHtml(question.section)}</span></div>
+            </div>
+            <div class="select-wrap">
+              <select id="question-${question.questionId}" data-question-id="${escapeHtml(question.questionId)}">${optionsMarkup}</select>
+              <div class="select-score" id="score-${question.questionId}">No answer selected</div>
+              <div class="scoring-guide" id="guide-${question.questionId}"><strong>Audit scoring guide</strong><div id="guide-text-${question.questionId}"></div></div>
+            </div>
+            <div class="question-comments">
+              <label for="comments-${question.questionId}">Comments and findings</label>
+              <textarea id="comments-${question.questionId}" placeholder="Add finding..."></textarea>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const pager = sectionEl.querySelector('.chapter-pager');
+      const chapterNames = Array.from(groupByChapter().keys());
+      const nextChapterName = chapterNames[chapterNames.indexOf(chapterName) + 1];
+      pager.querySelector('.page-label').textContent = `Page ${page + 1} of ${pageCount}`;
+      pager.querySelector('.previous-page').disabled = page === 0;
+      pager.querySelector('.next-page').disabled = false;
+      pager.querySelector('.next-page').textContent = page === pageCount - 1
+        ? (nextChapterName ? 'Next chapter' : 'Go to report')
+        : 'Next page';
+      pager.querySelector('.previous-page').onclick = () => {
+        chapterPages[chapterName] -= 1;
+        renderChapterPage(sectionEl, questions, chapterName);
+        scrollToFirstQuestion(sectionEl);
+      };
+      pager.querySelector('.next-page').onclick = () => {
+        if (page < pageCount - 1) {
+          chapterPages[chapterName] += 1;
+          renderChapterPage(sectionEl, questions, chapterName);
+          scrollToFirstQuestion(sectionEl);
+          return;
+        }
+
+        if (nextChapterName) {
+          chapterPages[nextChapterName] = 0;
+          renderQuestionnaire();
+          openChapter(nextChapterName);
+          return;
+        }
+
+        document.getElementById('reportPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+
+      pageQuestions.forEach((question) => {
+        const selectEl = document.getElementById(`question-${question.questionId}`);
+        selectEl.value = state.responses[question.questionId] ?? '';
+        selectEl.addEventListener('change', (event) => {
+          state.responses[question.questionId] = event.target.value;
+          updateSummary();
+        });
+        const commentsEl = document.getElementById(`comments-${question.questionId}`);
+        commentsEl.value = state.comments[question.questionId] || '';
+        commentsEl.classList.toggle('has-content', Boolean(commentsEl.value));
+        commentsEl.addEventListener('input', (event) => {
+          state.comments[question.questionId] = event.target.value;
+          commentsEl.classList.toggle('has-content', Boolean(event.target.value));
+        });
+        updateQuestionScoreLabel(question.questionId);
+      });
+    }
+
+    function openChapter(chapterName) {
+      const chapterSections = Array.from(document.querySelectorAll('#questionnaire .section'));
+      const target = chapterSections.find((section) => section.dataset.chapter === chapterName);
+      if (!target) return;
+      toggleQuestionnaireSection(target, true);
+      scrollToFirstQuestion(target);
+    }
+
+    function scrollToFirstQuestion(sectionEl) {
+      sectionEl.querySelector('.question')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function toggleQuestionnaireSection(sectionEl, forceOpen = false) {
+      const shouldOpen = forceOpen || !sectionEl.classList.contains('is-open');
       document.querySelectorAll('#questionnaire .section').forEach((section) => {
         section.classList.toggle('is-open', shouldOpen && section === sectionEl);
         const toggle = section.querySelector('.section-toggle');
         if (toggle) toggle.setAttribute('aria-expanded', String(shouldOpen && section === sectionEl));
       });
+      if (shouldOpen && chapterJumpEl) chapterJumpEl.value = sectionEl.dataset.chapter || '';
     }
 
     function groupByChapter() {
@@ -1417,7 +1664,7 @@
       const selectedAnswer = question.answers.find((answer) => String(answer.score) === String(response));
       scoreLabel.textContent = selectedAnswer ? `Selected score: ${selectedAnswer.score}` : 'Selected score';
       guideText.textContent = selectedAnswer ? selectedAnswer.label : '';
-      guide.classList.toggle('visible', Boolean(selectedAnswer));
+      guide.classList.toggle('visible', Boolean(selectedAnswer && showGuideToggle.checked));
     }
 
     function updateSummary() {
@@ -1462,7 +1709,17 @@
         `<span class="chip">${notApplicable} Not Applicable</span>`
       ].join('');
 
+      updateWorkspaceProgress(answered + notApplicable);
       renderReport();
+    }
+
+    function updateWorkspaceProgress(reviewed) {
+      const total = state.questions.length;
+      const percentage = total ? Math.round((reviewed / total) * 100) : 0;
+      progressBarEl.style.width = `${percentage}%`;
+      progressLabelEl.textContent = `${reviewed} of ${total} reviewed`;
+      progressPercentEl.textContent = `${percentage}%`;
+      nextPendingBtn.disabled = reviewed >= total;
     }
 
     function setStatus(message, kind = 'warn') {
